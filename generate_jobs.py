@@ -112,31 +112,44 @@ def check_output_path_existence(path, target):
         os.makedirs(path + target)
 
 
+def change_account(account):
+    with open(os.path.join(software_path, "job_template.sh")) as f:
+        lines = f.readlines()
+        for a, line in enumerate(lines):
+            if line.startswith("#SBATCH --account"):
+                lines[a] = f"#SBATCH --account {account}\n"
+    with open(os.path.join(software_path, "job_template.sh"), "w") as g:
+        for line in lines:
+            g.write(line)
+
+
 if __name__ == "__main__":
 
     config_file = "./config.txt"
     software_path = os.path.dirname(os.path.realpath(__file__))
     receptor_path = sys.argv[1]
-    conformer = sys.argv[2]
-    GA = sys.argv[3]
+    account = sys.argv[2]
+    conformer = sys.argv[3]
+    GA = sys.argv[4]
     next_job_counter = 1000
+    if account == "True" or account == "False":
+        exit("Incorrect argument order. Please acc your account name.")
+    change_account(account)
 
     if conformer == "True":
         active_ligand_path = os.path.join(receptor_path, "actives_final_conf.mol2")
         decoy_ligand_path = os.path.join(receptor_path, "decoys_final_conf.mol2")
     else:
-        active_ligand_path = os.path.join(receptor_path, "actives_final_OG.mol2")
-        decoy_ligand_path = os.path.join(receptor_path, "decoys_final_OG.mol2")
+        active_ligand_path = os.path.join(receptor_path, "actives_final.mol2")
+        decoy_ligand_path = os.path.join(receptor_path, "decoys_final.mol2")
 
     # PREPARE OUTPUT FOLDER
     output_path = "./results/"
     check_output_path_existence(output_path, receptor_path.split("/")[-2])
     # END PREP
 
-    receptor = os.path.join(receptor_path, find_file("target_test.mol2", receptor_path))
-    binding_site = os.path.join(receptor_path, "getcleft", find_file("_sph_1.pdb", f"{receptor_path}/getcleft/"))
-    # receptor = os.path.join(receptor_path, find_file(".inp.pdb", receptor_path))
-    # binding_site = os.path.join(receptor_path, "get_cleft", find_file("_sph_1.pdb", f"{receptor_path}/get_cleft/"))
+    receptor = os.path.join(receptor_path, find_file("receptor.mol2", receptor_path))
+    binding_site = os.path.join(receptor_path, "get_cleft", find_file("_sph_1.pdb", f"{receptor_path}/get_cleft/"))
 
     active_counter, active_line_list, active_name = count_molecules(active_ligand_path)
     decoy_counter, decoy_line_list, decoy_name = count_molecules(decoy_ligand_path)
@@ -164,5 +177,3 @@ if __name__ == "__main__":
         for f, element in enumerate(total_sbatch_list):
             if f < 1000:
                 h.write(element + "\n")
-
-
