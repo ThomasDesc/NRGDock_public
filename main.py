@@ -326,7 +326,6 @@ def main(config_file, ligands_list, binding_site, target, energy_matrix_file, la
     pred_05 = import_pred_list("pred_05.txt")
     pred_95 = import_pred_list("pred_95.txt")
     rad_dict = load_rad_list("./radius_list.txt")
-    #target_atoms_xyz, _, target_atoms_numbers_types, atoms_radius = load_atoms(target, rad_dict)
     target_atoms_xyz, target_atoms_numbers_types, atoms_radius = load_atoms_mol2(target, None, None, rad_dict)
     target_grid, min_xyz, cell_width = build_3d_cube_grid(params_dict, target_atoms_xyz, atoms_radius)
     original_grid = load_binding_site_grid(params_dict, binding_site)
@@ -336,7 +335,6 @@ def main(config_file, ligands_list, binding_site, target, energy_matrix_file, la
     cfs_list_by_ligand = np.zeros((len(ligands_list)), dtype=np.float32)
     non_zero_list = []
     non_clash_list = []
-    total_evals_list = []
     if verbose and Time:
         print(f"REMARK ligand start: {datetime.datetime.now().time()}")
     for i, ligand in enumerate(ligands_list):
@@ -361,7 +359,6 @@ def main(config_file, ligands_list, binding_site, target, energy_matrix_file, la
                 non_zero += 1
             if cf[0] != 1000000.0:
                 non_clash += 1
-        total_evals_list.append(len(cfs_list))
         non_zero_list.append(non_zero)
         non_clash_list.append(non_clash)
         if verbose and Time:
@@ -380,9 +377,9 @@ def main(config_file, ligands_list, binding_site, target, energy_matrix_file, la
     for a, ligand in enumerate(ligands_list):
         ligand_list[a] = ligand.replace("./test_ligand/", "")
     ##############################################################################################
-    print(f"REMARK | {'Name':^20} | {'CF':^20} | {'Atoms':^5} | {'Evals no clash and cf != 0':^26} | {'Evals no clash':^14} | {'Total evals':^11}")
+    print(f"REMARK | {'Name':^20} | {'CF':^20} | {'Atoms':^5} | {'Evals no clash and cf != 0':^26} | {'Evals no clash':^14}")
     for z, ligand in enumerate(ligand_list):
-        print(f"RESULT | {name_list[z]:^20} | {cfs_list_by_ligand[z]:^20} | {atm_quantity[z]:^5} | {non_zero_list[z]:^26} | {non_clash_list[z]:^14} | {total_evals_list[z]:^11}")
+        print(f"RESULT | {name_list[z]:^20} | {cfs_list_by_ligand[z]:^20} | {atm_quantity[z]:^5} | {non_zero_list[z]:^26} | {non_clash_list[z]:^14}")
     ##############################################################################################
 
 
