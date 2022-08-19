@@ -408,11 +408,11 @@ if __name__ == "__main__":
 
     config_file = "./config.txt"
 
-    #sys.stdout = open(f"./results/{path_to_ligands.split('/')[-2]}/{category}_{ligand_list[0].replace(path_to_ligands, '')}.txt", "w")
+    sys.stdout = open(f"./results/{path_to_ligands.split('/')[-2]}/{category}_{ligand_list[0].replace(path_to_ligands, '')}.txt", "w")
     if verbose and Time:
         print("REMARK time start:")
         print(datetime.datetime.now().time())
     print(f"REMARK Receptor path: {receptor}")
     print(f"REMARK Binding site grid path: {binding_site}")
     main(config_file, ligand_list, binding_site, receptor, './MC_5p_norm_P10_M2_2.txt', last_line)
-    #sys.stdout.close()
+    sys.stdout.close()
