@@ -33,7 +33,6 @@ def get_radius_number(letter_type, rad_dict):
         return rad_dict[letter_type][0], rad_dict[letter_type][1]
 
 
-
 @njit
 def get_params_dict(config_file):
     """ Params will be a dictionary of the important parameters, loaded from a text file. For example, number of
