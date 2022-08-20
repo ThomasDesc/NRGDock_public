@@ -138,7 +138,7 @@ if __name__ == "__main__":
     next_job_counter = 1000
     if account == "True" or account == "False" or account == "GROUP":
         exit("Incorrect argument. Please input your account name.")
-    change_account(account)
+    change_account(account, software_path)
 
     if conformer == "True":
         active_ligand_path = os.path.join(receptor_path, "actives_final_conf.mol2")
