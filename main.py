@@ -412,3 +412,4 @@ if __name__ == "__main__":
     print(f"REMARK Binding site grid path: {binding_site}")
     main(config_file, ligand_list, binding_site, receptor, './MC_5p_norm_P10_M2_2.txt', last_line)
     sys.stdout.close()
+
