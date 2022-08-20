@@ -112,12 +112,16 @@ def check_output_path_existence(path, target):
         os.makedirs(path + target)
 
 
-def change_account(account):
+def change_account(account, software_path):
     with open(os.path.join(software_path, "job_template.sh")) as f:
         lines = f.readlines()
         for a, line in enumerate(lines):
             if line.startswith("#SBATCH --account"):
                 lines[a] = f"#SBATCH --account {account}\n"
+            if line.startswith("source"):
+                path = os.path.dirname(software_path)
+                lines[a] = f"source {os.path.join(path,'ENV', 'bin', 'activate')}\n"
+
     with open(os.path.join(software_path, "job_template.sh"), "w") as g:
         for line in lines:
             g.write(line)
@@ -132,8 +136,8 @@ if __name__ == "__main__":
     conformer = sys.argv[3]
     GA = sys.argv[4]
     next_job_counter = 1000
-    if account == "True" or account == "False":
-        exit("Incorrect argument order. Please acc your account name.")
+    if account == "True" or account == "False" or account == "GROUP":
+        exit("Incorrect argument. Please input your account name.")
     change_account(account)
 
     if conformer == "True":
@@ -177,3 +181,4 @@ if __name__ == "__main__":
         for f, element in enumerate(total_sbatch_list):
             if f < 1000:
                 h.write(element + "\n")
+
