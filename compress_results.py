@@ -5,13 +5,12 @@ from analyse_new_results import main as ana
 
 
 class RESULT:
-    def __init__(self, name, cf, atoms, eval1, eval2, eval3, act_or_dec):
+    def __init__(self, name, cf, atoms, eval1, eval2, act_or_dec):
         self.name = name
         self.cf = float(cf)
         self.atoms = int(atoms)
         self.eval1 = int(eval1)
         self.eval2 = int(eval2)
-        self.eval3 = int(eval3)
         self.act_or_dec = act_or_dec
 
 
@@ -31,12 +30,12 @@ def get_name_list(target_path):
                     result_list.append(itemised_list)
             if filename.split("_")[0] == "active":
                 for element in result_list:
-                    ligand_list.append(RESULT(element[0], element[1], element[2], element[3], element[4], element[5], "active"))
+                    ligand_list.append(RESULT(element[0], element[1], element[2], element[3], element[4], "active"))
             elif filename.split("_")[0] == "decoy":
                 for element in result_list:
-                    ligand_list.append(RESULT(element[0], element[1], element[2], element[3], element[4], element[5], "decoy"))
+                    ligand_list.append(RESULT(element[0], element[1], element[2], element[3], element[4],  "decoy"))
             else:
-                ligand_list.append(RESULT(element[0], element[1], element[2], element[3], element[4], element[5], "ligand"))
+                ligand_list.append(RESULT(element[0], element[1], element[2], element[3], element[4], "ligand"))
     return ligand_list, info_list
 
 
@@ -47,7 +46,7 @@ def compress(output_path, ligand_list, target, info_list):
         for item in info_list:
             h.write(item)
         for ligand in ligand_list:
-            h.write(f"RESULT | {ligand.name:^20} | {ligand.cf:^20} | {ligand.atoms:^5} | {ligand.eval1:^26} | {ligand.eval2:^14} | {ligand.eval3:^11} | {ligand.act_or_dec:^11}\n")
+            h.write(f"RESULT | {ligand.name:^20} | {ligand.cf:^20} | {ligand.atoms:^5} | {ligand.eval1:^26} | {ligand.eval2:^14} | {ligand.act_or_dec:^11}\n")
 
 
 def check_result_folders_existence(path, tgt):
