@@ -386,7 +386,7 @@ def main(config_file, ligands_list, binding_site, target, energy_matrix_file, la
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     verbose = True
-    category = None
+    category = "ligand"
     Time = False
     atm_quantity = []
 
