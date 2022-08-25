@@ -1,10 +1,6 @@
 import os
 import sys
 
-# import matplotlib.pyplot as plt
-# import statistics
-# from scipy.stats import norm
-
 
 def make_unprocessed_list(path, divide_by_atm_count):
     unprocessed_list = []
@@ -30,6 +26,8 @@ def make_unprocessed_list(path, divide_by_atm_count):
                     if line[-1] == "decoy":
                         unprocessed_list.append(["decoy_" + name, float(cf)])
                         decoy_counter += 1
+                    if line[-1] == "ligand":
+                        unprocessed_list.append(["ligand_" + name, float(cf)])
     return unprocessed_list, active_counter, decoy_counter
 
 
@@ -55,6 +53,8 @@ def calculate_EF(ligand_list_sorted, target, active_number, decoy_number):
             decoy_counter += 1
         if ligand["Name"].startswith("active"):
             active_counter += 1
+        if ligand["Name"].startswith("ligand"):
+            return None
         if decoy_counter > len(ligand_list_sorted) * EF_percentage:
             break
     proportion = active_counter/(len(ligand_list_sorted)*EF_percentage)
@@ -65,31 +65,6 @@ def calculate_EF(ligand_list_sorted, target, active_number, decoy_number):
     dict["EF"] = EF
     organised_results.append(dict)
     return organised_results
-
-
-'''def graph(ligand_list_sorted):
-    cf_active_list_plot = []
-    cf_decoy_list_plot = []
-    for ligand in ligand_list_sorted:
-        if ligand["Name"].startswith("C"):
-            cf_active_list_plot.append(ligand["CF"])
-        if ligand["Name"].startswith("Z"):
-            cf_decoy_list_plot.append(ligand["CF"])
-
-
-    mean_decoy = statistics.mean(cf_decoy_list_plot)
-    mean_active = statistics.mean(cf_active_list_plot)
-    sd_decoy = statistics.stdev(cf_decoy_list_plot)
-    sd_active = statistics.stdev(cf_active_list_plot)
-
-    plt.plot(cf_decoy_list_plot, norm.pdf(cf_decoy_list_plot, mean_decoy, sd_decoy), label="decoy")
-    plt.plot(cf_active_list_plot, norm.pdf(cf_active_list_plot, mean_active, sd_active), label="decoy")
-
-    plt.xlabel('CF')
-    plt.ylabel('Frequency')
-    plt.legend(['decoy', 'active'])
-    plt.tight_layout()
-    plt.show()'''
 
 
 def save_results(list_of_dict, result_save_path):
@@ -115,9 +90,13 @@ def main(target, result_path, divide_by_atm_count):
         processed_list, active_counter, decoy_counter = make_unprocessed_list(base_path, divide_by_atm_count)
         ligand_list_sorted = make_ligand_list(processed_list)
         ef = calculate_EF(ligand_list_sorted, dir, active_counter, decoy_counter)
-        organised_results.append(ef)
+        if ef is None:
+            break
+        else:
+            organised_results.append(ef)
         # graph(ligand_list_sorted)
-    save_results(organised_results, result_path)
+    if organised_results is not []:
+        save_results(organised_results, result_path)
 
 
 if __name__ == "__main__":
