@@ -322,7 +322,7 @@ def clean_bindig_site_grid(params, target_grid, binding_site_grid, min_xyz, cell
         print("REMARK Deleted binding site grid dots: ", len(index))
         print("REMARK Total binding site grid dots: ", len(cleaned_binding_site_grid))
         print("REMARK Total CF evaluations per ligand: ", len(cleaned_binding_site_grid) * params["N_ORIENTATIONS"]**3)
-    write_test(cleaned_binding_site_grid, "cleaned", "./debug/")
+    #write_test(cleaned_binding_site_grid, "cleaned", "./debug/")
     return cleaned_binding_site_grid
 
 
