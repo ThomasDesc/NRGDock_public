@@ -90,6 +90,7 @@ def load_atoms_mol2(filename, ligand_line_start, ligand_last_line, rad_dict):
     atoms_radius = np.zeros((n_atoms, 1), dtype=np.float32)
     counter = 0
     coord_start = 0
+    atoms_name = []
     for line in lines:
         if line.startswith('@<TRIPOS>ATOM'):
             coord_start = 1
@@ -99,9 +100,10 @@ def load_atoms_mol2(filename, ligand_line_start, ligand_last_line, rad_dict):
             atoms_xyz[counter] = np.array([float(line[-60:-52]), float(line[-50:-42]), float(line[-40:-32])])
             atoms_numbers_types[counter][0] = int(line[:7])
             atoms_numbers_types[counter][1], atoms_radius[counter] = get_radius_number(line[46:52], rad_dict)
+            atoms_name.append(line[46:52].replace(" ", "").split(".")[0])
             counter += 1
     atoms_numbers_types_sorted = atoms_numbers_types[atoms_numbers_types[:, 0].argsort()]
-    return atoms_xyz, atoms_numbers_types_sorted, atoms_radius
+    return atoms_xyz, atoms_numbers_types_sorted, atoms_radius, atoms_name
 
 
 @njit
@@ -142,19 +144,26 @@ def load_binding_site_grid(params, binding_site):
                     if distance < row[3]:
                         grid_coords.append(coords)
                         break
-    #write_test(grid_coords, "OG_grid", PATH)
+    #write_test(grid_coords, "OG_grid", PATH, None)
     return grid_coords
 
 
 @njit
-def write_test(coord_list, name, path):
+def write_test(coord_list, name, path, ligand_names):
     textfile = open(f"{path}{name}.pdb", 'w')
     counter = 7000
     for line in coord_list:
-        textfile.write("ATOM   {:>4}  C   DOT X   1{:>12} {:>7} {:>7}   1.00  0.10 \n".format(str(counter),
-                                                                                              str(round(line[0], 3)),
-                                                                                              str(round(line[1], 3)),
-                                                                                              str(round(line[2], 3))))
+        if ligand_names is not None:
+            textfile.write("ATOM   {:>4}  {:<3} RES X   1{:>12} {:>7} {:>7}   1.00  0.10 \n".format(str(counter),
+                                                                                                    ligand_names[counter%7000],
+                                                                                                    str(round(line[0], 3)),
+                                                                                                    str(round(line[1], 3)),
+                                                                                                    str(round(line[2], 3))))
+        else:
+            textfile.write("ATOM   {:>4}  C   DOT X   1{:>12} {:>7} {:>7}   1.00  0.10 \n".format(str(counter),
+                                                                                                  str(round(line[0], 3)),
+                                                                                                  str(round(line[1], 3)),
+                                                                                                  str(round(line[2], 3))))
         counter += 1
     textfile.close()
 
@@ -313,7 +322,7 @@ def clean_bindig_site_grid(params, target_grid, binding_site_grid, min_xyz, cell
         print("REMARK Deleted binding site grid dots: ", len(index))
         print("REMARK Total binding site grid dots: ", len(cleaned_binding_site_grid))
         print("REMARK Total CF evaluations per ligand: ", len(cleaned_binding_site_grid) * params["N_ORIENTATIONS"]**3)
-    #write_test(cleaned_binding_site_grid, "cleaned", PATH)
+    write_test(cleaned_binding_site_grid, "cleaned", "./debug/")
     return cleaned_binding_site_grid
 
 
@@ -326,7 +335,7 @@ def main(config_file, ligands_list, binding_site, target, energy_matrix_file, la
     pred_05 = import_pred_list("pred_05.txt")
     pred_95 = import_pred_list("pred_95.txt")
     rad_dict = load_rad_list("./radius_list.txt")
-    target_atoms_xyz, target_atoms_numbers_types, atoms_radius = load_atoms_mol2(target, None, None, rad_dict)
+    target_atoms_xyz, target_atoms_numbers_types, atoms_radius, _ = load_atoms_mol2(target, None, None, rad_dict)
     target_grid, min_xyz, cell_width = build_3d_cube_grid(params_dict, target_atoms_xyz, atoms_radius)
     original_grid = load_binding_site_grid(params_dict, binding_site)
     binding_site_grid = clean_bindig_site_grid(params_dict, target_grid, original_grid, min_xyz, cell_width, target_atoms_xyz, verbose)
@@ -339,7 +348,7 @@ def main(config_file, ligands_list, binding_site, target, energy_matrix_file, la
         print(f"REMARK ligand start: {datetime.datetime.now().time()}")
     for i, ligand in enumerate(ligands_list):
         cfs_list = np.zeros((n_cf_evals, 3), dtype=np.float32)
-        ligand_atoms_xyz, ligand_atoms_numbers_types, ligand_atoms_radius = load_atoms_mol2(path_to_ligands, ligand, last_line, rad_dict)
+        ligand_atoms_xyz, ligand_atoms_numbers_types, ligand_atoms_radius, ligand_atoms_names = load_atoms_mol2(path_to_ligands, ligand, last_line, rad_dict)
         atm_quantity.append(len(ligand_atoms_xyz))
         ligand_orientations = rotate_ligand(ligand_atoms_xyz, params_dict)
         counter = 0
@@ -369,7 +378,7 @@ def main(config_file, ligands_list, binding_site, target, energy_matrix_file, la
             translated_coords = np.zeros((len(ligand_orientations[int(cfs_list[index[0]][1])]), 3), dtype=np.float32)
             for atom in range(len(ligand_orientations[int(cfs_list[index[0]][1])])):
                 translated_coords[atom] = np.add(ligand_orientations[int(cfs_list[index[0]][1])][atom], binding_site_grid[int(cfs_list[index[0]][2])])
-            write_test(translated_coords, name_list[i], './ligand_poses/')
+            write_test(translated_coords, name_list[i], f'./ligand_poses/{path_to_ligands.split("/")[-2]}/', ligand_atoms_names)
 
     if verbose and Time:
         print("REMARK time end:")
@@ -412,4 +421,5 @@ if __name__ == "__main__":
     print(f"REMARK Binding site grid path: {binding_site}")
     main(config_file, ligand_list, binding_site, receptor, './MC_5p_norm_P10_M2_2.txt', last_line)
     sys.stdout.close()
+
 
