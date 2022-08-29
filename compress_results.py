@@ -1,6 +1,8 @@
 import os
 import shutil
 import sys
+
+import fix_atom_pdb
 from analyse_new_results import main as ana
 
 
@@ -67,7 +69,7 @@ def get_output_name(cfg_path):
             params_dict['KEPT_PDB_NUMBER'] = line.split()[-1]
         elif line.startswith('CLEAN'):
             params_dict['CLEAN'] = line.split()[-1]
-    output_path = f"./results_processed/{params_dict['n_orientations']}_orientations_{params_dict['DOT_DIVISION']}_grid/"
+    output_path = f"./results_processed/{params_dict['n_orientations']}_rotations_{params_dict['DOT_DIVISION']}_grid/"
 
     if os.path.exists(output_path):
         number = 2
@@ -109,10 +111,19 @@ def delete_ligands(number, ligand_list, output_path, dir):
     if not os.path.exists(new_dir):
         os.mkdir(new_dir)
     for filename in good_ligands:
+        if os.path.exists(f"./ligand_poses/{dir}"):
+            init_dir = f"./ligand_poses/{dir}/"
+        else:
+            init_dir = f"./ligand_poses/"
         try:
-            shutil.copyfile(f"./ligand_poses/{filename}.pdb", f"{new_dir}/{filename}.pdb")
+            shutil.copyfile(f"{init_dir}{filename}.pdb", f"{new_dir}/{filename}.pdb")
         except:
+            print("error copying ligand")
             continue
+        if filename.startswith("CHEMBL"):
+            fix_atom_pdb.main(f"{init_dir}/", f"../{dir}/actives_final.mol2", filename)
+        elif filename.startswith("ZINC"):
+            fix_atom_pdb.main(f"{init_dir}/", f"../{dir}/decoys_final.mol2", filename)
     shutil.rmtree("./ligand_poses")
     os.mkdir("./ligand_poses")
 
