@@ -43,7 +43,6 @@ def execute_fix(to_be_fixed, good_list, output_path):
             f.write(line)
 
 def main(path_ligands, path_good_files, name):
-    print("fix")
     to_be_fixed = read_ligand_to_fix(name + ".pdb", path_ligands)
     good_list = find_good_atm_names(name, path_good_files)
     execute_fix(to_be_fixed, good_list, path.join(path_ligands, name +".pdb"))
