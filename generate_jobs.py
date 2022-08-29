@@ -2,7 +2,6 @@ import shutil
 import sys
 import os
 
-
 def find_file(end, path):
     filenames = next(os.walk(path), (None, None, []))[2]
     for filename in filenames:
@@ -149,7 +148,9 @@ if __name__ == "__main__":
 
     # PREPARE OUTPUT FOLDER
     output_path = "./results/"
+    ligand_pose_path = "./ligand_poses/"
     check_output_path_existence(output_path, receptor_path.split("/")[-2])
+    check_output_path_existence(ligand_pose_path, receptor_path.split("/")[-2])
     # END PREP
 
     receptor = os.path.join(receptor_path, find_file("receptor.mol2", receptor_path))
@@ -181,4 +182,3 @@ if __name__ == "__main__":
         for f, element in enumerate(total_sbatch_list):
             if f < 1000:
                 h.write(element + "\n")
-
