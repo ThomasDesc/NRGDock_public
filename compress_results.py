@@ -128,7 +128,7 @@ def delete_ligands(number, ligand_list, output_path, dir):
     os.mkdir("./ligand_poses")
 
 
-def main(target, result_path, config_file):
+def main(target, result_path, config_file, enrichment_):
 
     output_path, params_dict = get_output_name(config_file)
     print("output path: ", output_path)
@@ -141,7 +141,8 @@ def main(target, result_path, config_file):
         compress(output_path, ligand_list, dir, info_list)
         delete_ligands(params_dict["KEPT_PDB_NUMBER"], ligand_list, output_path, dir)
     reset_result_folder(result_path, params_dict)
-    ana(target, output_path, divide_by_atm_count=False)
+    if enrichment_:
+        ana(target, output_path, divide_by_atm_count=False)
 
 
 
@@ -151,9 +152,13 @@ if __name__ == "__main__":
     except:
         print('No target specified. Analysing all targets')
         target = None
-
+    try:
+        enrichment = sys.argv[2]
+    except:
+        print("Analysis type not specified. If you want to calculate an enrichment factor: True")
     result_path = "./results/"
     config_file = "config.txt"
 
-    main(target, result_path, config_file)
+    main(target, result_path, config_file, enrichment)
+
 
