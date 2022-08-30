@@ -134,6 +134,10 @@ if __name__ == "__main__":
     account = sys.argv[2]
     conformer = sys.argv[3]
     GA = sys.argv[4]
+    try:
+        enriching = sys.argv[5]
+    except:
+        print("missing argument, True or False, do you have 2 ligand files (active and decoy)?")
     next_job_counter = 1000
     if account == "True" or account == "False" or account == "GROUP":
         exit("Incorrect argument. Please input your account name.")
@@ -156,29 +160,51 @@ if __name__ == "__main__":
     receptor = os.path.join(receptor_path, find_file("receptor.mol2", receptor_path))
     binding_site = os.path.join(receptor_path, "get_cleft", find_file("_sph_1.pdb", f"{receptor_path}/get_cleft/"))
 
-    active_counter, active_line_list, active_name = count_molecules(active_ligand_path)
-    decoy_counter, decoy_line_list, decoy_name = count_molecules(decoy_ligand_path)
-    active_job_limit = int(2000 / ((active_counter + decoy_counter) / active_counter))
-    decoy_job_limit = int(2000 / ((active_counter + decoy_counter) / decoy_counter)) - 1
-    active_final_list, active_final_name_list = divisible(active_counter, active_line_list,
-                                                          active_job_limit, active_name)
-    decoy_final_list, decoy_final_name_list = divisible(decoy_counter, decoy_line_list,
-                                                        decoy_job_limit, decoy_name)
-    job_number = len(active_final_list) + len(decoy_final_list)
-    active_string_list = build_string_list(active_final_list, active_ligand_path,
-                                           active_final_name_list, GA, job_number, receptor, binding_site)
-    decoy_string_list = build_string_list(decoy_final_list, decoy_ligand_path,
-                                          decoy_final_name_list, GA, job_number, receptor, binding_site)
+    if enriching == "True":
+        active_counter, active_line_list, active_name = count_molecules(active_ligand_path)
+        decoy_counter, decoy_line_list, decoy_name = count_molecules(decoy_ligand_path)
+        active_job_limit = int(2000 / ((active_counter + decoy_counter) / active_counter))
+        decoy_job_limit = int(2000 / ((active_counter + decoy_counter) / decoy_counter)) - 1
+        active_final_list, active_final_name_list = divisible(active_counter, active_line_list,
+                                                              active_job_limit, active_name)
+        decoy_final_list, decoy_final_name_list = divisible(decoy_counter, decoy_line_list,
+                                                            decoy_job_limit, decoy_name)
+        job_number = len(active_final_list) + len(decoy_final_list)
+        active_string_list = build_string_list(active_final_list, active_ligand_path,
+                                               active_final_name_list, GA, job_number, receptor, binding_site)
+        decoy_string_list = build_string_list(decoy_final_list, decoy_ligand_path,
+                                              decoy_final_name_list, GA, job_number, receptor, binding_site)
 
-    clean_job_folder()
+        clean_job_folder()
 
-    job_counter = 0
-    active_sbatch_list = build_sbatch_list(active_string_list)
-    decoy_sbatch_list = build_sbatch_list(decoy_string_list)
+        job_counter = 0
+        active_sbatch_list = build_sbatch_list(active_string_list)
+        decoy_sbatch_list = build_sbatch_list(decoy_string_list)
 
-    total_sbatch_list = active_sbatch_list + decoy_sbatch_list
+        total_sbatch_list = active_sbatch_list + decoy_sbatch_list
 
-    with open("./jobs/start_jobs.sh", "w") as h:
-        for f, element in enumerate(total_sbatch_list):
-            if f < 1000:
-                h.write(element + "\n")
+        with open("./jobs/start_jobs.sh", "w") as h:
+            for f, element in enumerate(total_sbatch_list):
+                if f < 1000:
+                    h.write(element + "\n")
+    if enriching == "False":
+        active_ligand_path = os.path.join(receptor_path, "ligands.mol2")
+        active_counter, active_line_list, active_name = count_molecules(active_ligand_path)
+        active_job_limit = 2000
+        active_final_list, active_final_name_list = divisible(active_counter, active_line_list,
+                                                              active_job_limit, active_name)
+        job_number = len(active_final_list)
+        active_string_list = build_string_list(active_final_list, active_ligand_path,
+                                               active_final_name_list, GA, job_number, receptor, binding_site)
+
+        clean_job_folder()
+
+        job_counter = 0
+        active_sbatch_list = build_sbatch_list(active_string_list)
+
+        total_sbatch_list = active_sbatch_list
+
+        with open("./jobs/start_jobs.sh", "w") as h:
+            for f, element in enumerate(total_sbatch_list):
+                if f < 1000:
+                    h.write(element + "\n")
