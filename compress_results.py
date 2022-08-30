@@ -99,6 +99,7 @@ def reset_result_folder(results, params_dict):
 
 def get_good_ligands(number, ligand_list):
     good_ligands = []
+    print(ligand_list)
     for ligand_counter, ligand in enumerate(ligand_list):
         if ligand_counter > int(number) - 1:
             return good_ligands
