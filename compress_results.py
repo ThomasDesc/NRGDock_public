@@ -99,12 +99,12 @@ def reset_result_folder(results, params_dict):
 
 def get_good_ligands(number, ligand_list):
     good_ligands = []
-    print(ligand_list)
     for ligand_counter, ligand in enumerate(ligand_list):
         if ligand_counter > int(number) - 1:
             return good_ligands
         else:
             good_ligands.append(ligand.name)
+    return good_ligands
 
 
 def delete_ligands(number, ligand_list, output_path, dir):
@@ -162,7 +162,4 @@ if __name__ == "__main__":
     config_file = "config.txt"
 
     main(target, result_path, config_file, enrichment)
-
-
-
 
