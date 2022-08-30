@@ -37,7 +37,8 @@ def get_name_list(target_path):
                 for element in result_list:
                     ligand_list.append(RESULT(element[0], element[1], element[2], element[3], element[4],  "decoy"))
             else:
-                ligand_list.append(RESULT(element[0], element[1], element[2], element[3], element[4], "ligand"))
+                for element in result_list:
+                    ligand_list.append(RESULT(element[0], element[1], element[2], element[3], element[4], "ligand"))
     return ligand_list, info_list
 
 
@@ -160,5 +161,7 @@ if __name__ == "__main__":
     config_file = "config.txt"
 
     main(target, result_path, config_file, enrichment)
+
+
 
 
