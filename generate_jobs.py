@@ -131,6 +131,8 @@ if __name__ == "__main__":
     config_file = "./config.txt"
     software_path = os.path.dirname(os.path.realpath(__file__))
     receptor_path = sys.argv[1]
+    if not receptor_path.endswith("/"):
+        receptor_path += "/"
     account = sys.argv[2]
     conformer = sys.argv[3]
     GA = sys.argv[4]
@@ -138,6 +140,7 @@ if __name__ == "__main__":
         enriching = sys.argv[5]
     except:
         print("missing argument, True or False, do you have 2 ligand files (active and decoy)?")
+        exit()
     next_job_counter = 1000
     if account == "True" or account == "False" or account == "GROUP":
         exit("Incorrect argument. Please input your account name.")
